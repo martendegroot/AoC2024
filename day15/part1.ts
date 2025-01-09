@@ -1,3 +1,7 @@
 import { WareHouse } from "./warehouse";
 
-new WareHouse("input.test");
+const warehouse = new WareHouse("input");
+
+warehouse.solve();
+
+console.log(warehouse.calculateScore());

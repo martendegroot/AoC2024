@@ -13,10 +13,6 @@ export class WareHouse {
 
   constructor(filename: string) {
     this.importFile(filename);
-
-    while (this.instructions.length > 0) {
-      this.attemptMove();
-    }
   }
 
   importFile(filename: string) {
@@ -28,6 +24,12 @@ export class WareHouse {
       .readFileSync(filename + ".instructions.txt", "utf8")
       .replaceAll("\n", "");
     this.instructions = Array.from(instructionsInput);
+  }
+
+  solve() {
+    while (this.instructions.length > 0) {
+      this.attemptMove();
+    }
   }
 
   getPosition() {
@@ -88,5 +90,19 @@ export class WareHouse {
     if (nextEmptySpace > 0) {
       this.updateGrid(direction, nextEmptySpace);
     }
+  }
+
+  calculateScore() {
+    let sum = 0;
+
+    for (let r = 0; r < this.grid.length; r++) {
+      for (let c = 0; c < this.grid[0].length; c++) {
+        if (this.grid[r][c] === "O") {
+          sum += 100 * r + c;
+        }
+      }
+    }
+
+    return sum;
   }
 }
