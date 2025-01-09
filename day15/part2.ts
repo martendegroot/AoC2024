@@ -1,10 +1,10 @@
-import { WareHouse } from "./warehouse";
+import { WareHouse } from "./warehouse2";
 
-const warehouse = new WareHouse("input.test3.default");
+const warehouse = new WareHouse("input.test.3");
 
 warehouse.widenGrid();
 
-console.table(warehouse.grid);
+// console.table(warehouse.grid);
 
 // warehouse.solve();
 

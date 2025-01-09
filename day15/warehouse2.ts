@@ -26,6 +26,19 @@ export class WareHouse {
     this.instructions = Array.from(instructionsInput);
   }
 
+  widenGrid() {
+    const newGrid = this.grid.map((row) =>
+      row.flatMap((c: string) => {
+        if (c === "#") return ["#", "#"];
+        if (c === "O") return ["[", "]"];
+        if (c === ".") return [".", "."];
+        if (c === "@") return ["@", "."];
+      })
+    );
+
+    this.grid = newGrid;
+  }
+
   solve() {
     while (this.instructions.length > 0) {
       this.attemptMove();
@@ -42,29 +55,7 @@ export class WareHouse {
     }
   }
 
-  findEmptySpace(direction: number[]): number {
-    const [r, c] = this.getPosition();
-
-    const getChar = (range: number): string =>
-      this.grid[r + direction[0] * range][c + direction[1] * range];
-
-    let range = 1;
-
-    while (true) {
-      const char = getChar(range);
-
-      switch (char) {
-        case ".":
-          return range;
-        case "#":
-          return 0;
-        default:
-          range++;
-      }
-    }
-  }
-
-  updateGrid(direction: number[], nextEmptySpace: number) {
+  moveFreely(direction: number[]) {
     const [r, c] = this.getPosition();
 
     // Update current position
@@ -72,12 +63,42 @@ export class WareHouse {
 
     // Update the movement marker
     this.grid[r + direction[0]][c + direction[1]] = "@";
+  }
 
-    // Replace the box if needed
-    if (nextEmptySpace > 1) {
-      this.grid[r + direction[0] * nextEmptySpace][
-        c + direction[1] * nextEmptySpace
-      ] = "O";
+  findHorizontalSpace(position: number[], direction: number[]): number {
+    const [r, c] = position;
+
+    const getChar = (range: number): string =>
+      this.grid[r + direction[0] * range][c + direction[1] * range];
+
+    let i = 1;
+    while (true) {
+      const char = getChar(i);
+
+      if (char === ".") return r;
+      if (char === "#") return 0;
+
+      i++;
+    }
+  }
+
+  horizontalPush(direction: number[]) {
+    const position = this.getPosition();
+    const space = this.findHorizontalSpace(position, direction);
+
+    const [r, c] = position;
+
+    // Remove free space
+    this.grid[r].splice(space, 1);
+
+    // Add in free space behind
+    this.grid[r].splice(c - direction[1], 0, ".");
+  }
+
+  pushBox(direction: number[]) {
+    if (direction[0] === 0) {
+      this.horizontalPush(direction);
+    } else {
     }
   }
 
@@ -85,10 +106,13 @@ export class WareHouse {
     const instruction = this.instructions.shift();
     const direction = directions[instruction];
 
-    const nextEmptySpace = this.findEmptySpace(direction);
+    const [r, c] = direction;
+    const nextChar = this.grid[r + direction[0]][c + direction[1]];
 
-    if (nextEmptySpace > 0) {
-      this.updateGrid(direction, nextEmptySpace);
+    if (nextChar === ".") {
+      this.moveFreely(direction);
+    } else if (nextChar === "[" || nextChar === "]") {
+      this.pushBox(direction);
     }
   }
 
@@ -97,7 +121,7 @@ export class WareHouse {
 
     for (let r = 0; r < this.grid.length; r++) {
       for (let c = 0; c < this.grid[0].length; c++) {
-        if (this.grid[r][c] === "O") {
+        if (this.grid[r][c] === "[") {
           sum += 100 * r + c;
         }
       }
