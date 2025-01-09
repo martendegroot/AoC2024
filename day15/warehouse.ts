@@ -28,11 +28,11 @@ export class WareHouse {
 
   widenGrid() {
     const newGrid = this.grid.map((row) =>
-      row.map((c) => {
-        if (c === "#") return "##";
-        if (c === "O") return "[]";
-        if (c === ".") return "..";
-        if (c === "@") return "@.";
+      row.flatMap((c: string) => {
+        if (c === "#") return ["#", "#"];
+        if (c === "O") return ["[", "]"];
+        if (c === ".") return [".", "."];
+        if (c === "@") return ["@", "."];
       })
     );
 
