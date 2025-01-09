@@ -26,6 +26,19 @@ export class WareHouse {
     this.instructions = Array.from(instructionsInput);
   }
 
+  widenGrid() {
+    const newGrid = this.grid.map((row) =>
+      row.map((c) => {
+        if (c === "#") return "##";
+        if (c === "O") return "[]";
+        if (c === ".") return "..";
+        if (c === "@") return "@.";
+      })
+    );
+
+    this.grid = newGrid;
+  }
+
   solve() {
     while (this.instructions.length > 0) {
       this.attemptMove();
