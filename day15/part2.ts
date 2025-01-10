@@ -1,11 +1,9 @@
 import { WareHouse } from "./warehouse2";
 
-const warehouse = new WareHouse("input.test.3");
+const warehouse = new WareHouse("input");
 
 warehouse.widenGrid();
 
-// console.table(warehouse.grid);
+warehouse.solve();
 
-// warehouse.solve();
-
-// console.log(warehouse.calculateScore());
+console.log(warehouse.calculateScore());

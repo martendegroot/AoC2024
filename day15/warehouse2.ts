@@ -82,8 +82,7 @@ export class WareHouse {
     }
   }
 
-  horizontalPush(direction: number[]) {
-    const position = this.getPosition();
+  horizontalPush(direction: number[], position: number[]) {
     const space = this.findHorizontalSpace(position, direction);
 
     if (space > 0) {
@@ -93,15 +92,82 @@ export class WareHouse {
       this.grid[r].splice(c + direction[1] * space, 1);
 
       // Add in free space behind
-      this.grid[r].splice(c, 0, "o");
+      this.grid[r].splice(c, 0, ".");
     }
   }
 
-  pushBox(direction: number[]) {
-    if (direction[0] === 0) {
-      this.horizontalPush(direction);
+  getBoxPositions(direction: number[], position: number[]) {
+    const [r, c] = position;
+
+    const nextRow = r + direction[0];
+    const nextCol = c + direction[1];
+    const nextChar = this.grid[nextRow][nextCol];
+
+    if (nextChar === "[") {
+      return [
+        [nextRow, nextCol],
+        [nextRow, nextCol + 1],
+      ];
+    } else if (nextChar === "]") {
+      return [
+        [nextRow, nextCol],
+        [nextRow, nextCol - 1],
+      ];
+    } else if (nextChar === "#") {
+      return true;
     } else {
-      // vertical push
+      return false;
+    }
+  }
+
+  verticalPush(direction: number[], position: number[]) {
+    const checkStack = this.getBoxPositions(direction, position) as number[][];
+    const shiftStack = [...checkStack];
+
+    while (checkStack.length > 0) {
+      const boxPart = checkStack.shift();
+
+      const outcome = this.getBoxPositions(direction, boxPart);
+
+      if (typeof outcome === "boolean") {
+        // If positive, the checkStack is blocked
+        if (outcome) return;
+      } else {
+        for (const outcomePart of outcome) {
+          if (
+            !checkStack.some(
+              (part) => part[0] === outcomePart[0] && part[1] === outcomePart[1]
+            )
+          ) {
+            checkStack.push(...outcome);
+            shiftStack.push(...outcome);
+          }
+        }
+      }
+    }
+
+    // Update the grid
+    while (shiftStack.length > 0) {
+      const [br, bc] = shiftStack.pop();
+      const partChar = this.grid[br][bc];
+
+      this.grid[br + direction[0]][bc + direction[1]] = partChar;
+      this.grid[br][bc] = ".";
+    }
+
+    // Update robot
+    const [r, c] = position;
+    this.grid[r + direction[0]][c + direction[1]] = "@";
+    this.grid[r][c] = ".";
+  }
+
+  pushBox(direction: number[]) {
+    const position = this.getPosition();
+
+    if (direction[0] === 0) {
+      this.horizontalPush(direction, position);
+    } else {
+      this.verticalPush(direction, position);
     }
   }
 
